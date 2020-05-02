@@ -14,9 +14,10 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     float _totalWaitTime = 3f;
 
-    //The probablility of sqitching direction
-    [SerializeField]
-    float _switchProbability = 0.2f;
+    [Space]
+
+    [Range(1,10)]
+    public float _enemySpeed = 3f;
 
     //Private variables for base behaviour
     NavMeshAgent _navMeshAgent;

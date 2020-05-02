@@ -995,9 +995,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc0c0d81ca85496b9c43f9af580beb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _patrolWaiting: 0
+  _patrolWaiting: 1
   _totalWaitTime: 3
-  _switchProbability: 0.2
+  _enemySpeed: 5.7
 --- !u!195 &1126018543
 NavMeshAgent:
   m_ObjectHideFlags: 0
