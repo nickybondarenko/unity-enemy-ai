@@ -18,17 +18,16 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     float _switchProbability = 0.2f;
 
-    //The list of all patrol nodes to visit
-    [SerializeField]
-    List<Waypoint> _patrolPoints;
-
     //Private variables for base behaviour
     NavMeshAgent _navMeshAgent;
-    int _currentPatrolIndex;
+    ConnectedWaypoint _currentWaypoint;
+    ConnectedWaypoint _previousWaypoint;
+
+    
     bool _travelling;
     bool _waiting;
-    bool _patrolForward;
     float _waitTimer;
+    int _waypointsVisited;
 
     public void Start()
     {
@@ -41,16 +40,29 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            if (_patrolPoints != null && _patrolPoints.Count >= 2)
+            if (_currentWaypoint == null)
             {
-                _currentPatrolIndex = 0;
-                SetDestination();
+                //Set it as random
+                GameObject[] allWaypoints = GameObject.FindGameObjectsWithTag("Waypoint");
+
+                if (allWaypoints.Length > 0) {
+                    while (_currentWaypoint == null) {
+                        int random = UnityEngine.Random.Range(0, allWaypoints.Length);
+                        ConnectedWaypoint startingWaypoint = allWaypoints[random].GetComponent<ConnectedWaypoint>();
+
+                        if (startingWaypoint != null) {
+                            _currentWaypoint = startingWaypoint;
+                        }
+                    }
+                }
             }
             else
             {
                 Debug.Log("Insufficient patrol points for basic patrolling behaviour");
             }
         }
+
+        SetDestination();
     }
 
     public void Update()
@@ -60,6 +72,7 @@ public class EnemyAI : MonoBehaviour
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
         {
             _travelling = false;
+            _waypointsVisited++;
 
             //If we're going to wait, then wait.
             if (_patrolWaiting)
@@ -69,7 +82,6 @@ public class EnemyAI : MonoBehaviour
             }
             else
             {
-                ChangePatrolPoint();
                 SetDestination();
             }
         }
@@ -81,37 +93,22 @@ public class EnemyAI : MonoBehaviour
             if (_waitTimer >= _totalWaitTime) {
                 _waiting = false;
 
-                ChangePatrolPoint();
                 SetDestination();
-            }
-        }
-    }
-
-    private void ChangePatrolPoint()
-    {
-        if (UnityEngine.Random.Range(0f, 1f) <= _switchProbability)
-        {
-            _patrolForward = !_patrolForward;
-        }
-
-        if (_patrolForward)
-        {
-            _currentPatrolIndex = (_currentPatrolIndex + 1) % _patrolPoints.Count;
-        }
-        else
-        {
-            if (--_currentPatrolIndex < 0) {
-                _currentPatrolIndex = _patrolPoints.Count - 1;
             }
         }
     }
 
     private void SetDestination()
     {
-        if (_patrolPoints != null) {
-            Vector3 targetVector = _patrolPoints[_currentPatrolIndex].transform.position;
-            _navMeshAgent.SetDestination(targetVector);
-            _travelling = true;
+        if (_waypointsVisited > 0) {
+            //To maintain where I've just been and where I'm going
+            ConnectedWaypoint nextWaypoint = _currentWaypoint.NextWaypoint(_previousWaypoint);
+            _previousWaypoint = _currentWaypoint;
+            _currentWaypoint = nextWaypoint;
         }
+
+        Vector3 targetVector = _currentWaypoint.transform.position;
+        _navMeshAgent.SetDestination(targetVector);
+        _travelling = true;
     }
 }
