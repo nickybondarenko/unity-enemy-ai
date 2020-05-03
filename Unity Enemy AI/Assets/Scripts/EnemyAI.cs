@@ -97,6 +97,14 @@ public class EnemyAI : MonoBehaviour
                 SetDestination();
             }
         }
+
+        //Setting up the speed for the Enemy: taking it from the slider in inspector and
+        //updating the NavMeshAgent speed
+        //When I implement different behaviours, I'll extend this code
+
+        //Side note: acceleration can be "running" for the enemy AI.
+
+        this.gameObject.GetComponent<NavMeshAgent>().speed = _enemySpeed;
     }
 
     private void SetDestination()
