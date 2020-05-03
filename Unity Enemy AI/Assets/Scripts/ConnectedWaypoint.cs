@@ -35,12 +35,15 @@ public class ConnectedWaypoint : Waypoint
 
     public override void OnDrawGizmos()
     {
+        //Draws the waypoint sphere
         float debugDrawRadius = 0.5f;
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(transform.position, debugDrawRadius);
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(transform.position, _connectivityRadius);
+        //Draws the radius, in which the waypoints are considered reachable from this one
+
+        //Gizmos.color = Color.yellow;
+        //Gizmos.DrawSphere(transform.position, _connectivityRadius);
     }
 
 
@@ -56,14 +59,14 @@ public class ConnectedWaypoint : Waypoint
             return previousWaypoint;
         }
         else {
-            ConnectedWaypoint nextWaypoint;
+            ConnectedWaypoint nextWaypoint = previousWaypoint;
             int nextIndex = 0;
 
-            do
-            {
+            while (nextWaypoint == previousWaypoint) {
                 nextIndex = UnityEngine.Random.Range(0, _connections.Count);
                 nextWaypoint = _connections[nextIndex];
-            } while (nextWaypoint == previousWaypoint);
+            }
+
 
             return nextWaypoint;
         }

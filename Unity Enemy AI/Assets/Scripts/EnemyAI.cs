@@ -14,10 +14,11 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     float _totalWaitTime = 3f;
 
+    //This is where the functionality of Enemy AI will be: speed, aggressiveness, attention
     [Space]
 
-    [Range(1,10)]
-    public float _enemySpeed = 3f;
+    [SerializeField][Range(1,10)]
+    float _enemySpeed = 3f;
 
     //Private variables for base behaviour
     NavMeshAgent _navMeshAgent;
@@ -75,6 +76,7 @@ public class EnemyAI : MonoBehaviour
             _travelling = false;
             _waypointsVisited++;
 
+
             //If we're going to wait, then wait.
             if (_patrolWaiting)
             {
@@ -90,22 +92,39 @@ public class EnemyAI : MonoBehaviour
         //If we're waiting
         if (_waiting) {
             _waitTimer += Time.deltaTime;
+            //Prevents the agent from clipping
+            //Halt(_navMeshAgent);
 
             if (_waitTimer >= _totalWaitTime) {
                 _waiting = false;
+                Patrol(_navMeshAgent);
 
                 SetDestination();
             }
         }
 
-        //Setting up the speed for the Enemy: taking it from the slider in inspector and
-        //updating the NavMeshAgent speed
-        //When I implement different behaviours, I'll extend this code
-
-        //Side note: acceleration can be "running" for the enemy AI.
-
-        this.gameObject.GetComponent<NavMeshAgent>().speed = _enemySpeed;
+        //Starting the partolling behaviour
+        Patrol(_navMeshAgent);
     }
+
+
+
+    //Patrolling speed set to enemySpeed indicated in the inspector
+    //Stopping distance set up for the agent who stops
+    private void Patrol(NavMeshAgent navMeshAgent)
+    {
+        navMeshAgent.speed = _enemySpeed;
+
+    }
+
+
+    //Brings the NavMeshAgent to a halt
+    private void Halt(NavMeshAgent navMeshAgent)
+    {
+        navMeshAgent.speed = 0f;
+    }
+
+
 
     private void SetDestination()
     {
