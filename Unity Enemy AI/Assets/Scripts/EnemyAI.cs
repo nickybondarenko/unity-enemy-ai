@@ -119,6 +119,7 @@ public class EnemyAI : MonoBehaviour
 
 
     //Brings the NavMeshAgent to a halt
+    // TO-DO: check if you need it
     private void Halt(NavMeshAgent navMeshAgent)
     {
         navMeshAgent.speed = 0f;
