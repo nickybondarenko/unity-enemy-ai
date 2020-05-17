@@ -30,10 +30,26 @@ public class EnemyAI : MonoBehaviour
     bool _waiting;
     float _waitTimer;
     int _waypointsVisited;
+    float _maxRayDistance = 5f;
+
+    GameObject otherEnemyAI;
 
     public void Start()
     {
+        //Remembering which Enemy AI entity is the "other one" for future references
+        GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("Enemy AI");
 
+        if (enemyAIs[0].name == this.gameObject.name)
+        {
+            otherEnemyAI = enemyAIs[1];
+        }
+        else
+        {
+            otherEnemyAI = enemyAIs[0];
+        }
+
+
+        //Working with NavMesh
         _navMeshAgent = this.GetComponent<NavMeshAgent>();
 
         if (_navMeshAgent == null)
@@ -105,6 +121,13 @@ public class EnemyAI : MonoBehaviour
 
         //Starting the partolling behaviour
         Patrol(_navMeshAgent);
+
+
+        //If the enemy can see the other enemy
+        if (canSee(otherEnemyAI))
+        {
+            Debug.Log("Time to chat");
+        }
     }
 
 
@@ -140,4 +163,22 @@ public class EnemyAI : MonoBehaviour
         _navMeshAgent.SetDestination(targetVector);
         _travelling = true;
     }
+
+
+    private bool canSee(GameObject obj) {
+        Ray ray = new Ray(transform.position, obj.transform.position);
+        RaycastHit hit;
+        Debug.DrawLine(transform.position, obj.transform.position, Color.red);
+        if (Physics.Raycast(ray, out hit, _maxRayDistance) && (hit.collider.tag == "Enemy AI"))
+        {
+            //Debug.Log("You have hit " + obj.name);
+            return true;
+        }
+        else
+        {
+            //Debug.Log("There was a collider in between");
+            return false;
+        }
+    }
+
 }

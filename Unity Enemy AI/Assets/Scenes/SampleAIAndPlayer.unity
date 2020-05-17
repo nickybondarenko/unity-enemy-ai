@@ -182,7 +182,7 @@ GameObject:
   - component: {fileID: 11434732}
   m_Layer: 0
   m_Name: EnemyAlice
-  m_TagString: Untagged
+  m_TagString: Enemy AI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1080,7 +1080,7 @@ GameObject:
   - component: {fileID: 1126018543}
   m_Layer: 0
   m_Name: EnemyBob
-  m_TagString: Untagged
+  m_TagString: Enemy AI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1171,7 +1171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc0c0d81ca85496b9c43f9af580beb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _patrolWaiting: 1
+  _patrolWaiting: 0
   _totalWaitTime: 3
   _enemySpeed: 3
 --- !u!195 &1126018543
