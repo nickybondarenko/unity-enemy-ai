@@ -30,12 +30,15 @@ public class EnemyAI : MonoBehaviour
     bool _waiting;
     float _waitTimer;
     int _waypointsVisited;
-    float _maxRayDistance = 5f;
+    float _maxRayDistance = 15f;
+
+    private static float timer = 5f;
 
     GameObject otherEnemyAI;
 
     public void Start()
     {
+
         //Remembering which Enemy AI entity is the "other one" for future references
         GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("Enemy AI");
 
@@ -122,27 +125,32 @@ public class EnemyAI : MonoBehaviour
         //Starting the partolling behaviour
         Patrol(_navMeshAgent);
 
+        Debug.Log(timer);
 
-        //If the enemy can see the other enemy
+        //If the enemy can see the other enemy, they halt for 5 seconds and continue walking
         if (canSee(otherEnemyAI))
         {
-            Debug.Log("Time to chat");
+            talkToAnotherAI(otherEnemyAI);
         }
+
     }
 
 
+    private IEnumerator resetTimer()
+    {
+        yield return new WaitForSeconds(10f);
+        timer = 5f;
+    }
 
     //Patrolling speed set to enemySpeed indicated in the inspector
     //Stopping distance set up for the agent who stops
     private void Patrol(NavMeshAgent navMeshAgent)
     {
         navMeshAgent.speed = _enemySpeed;
-
     }
 
 
     //Brings the NavMeshAgent to a halt
-    // TO-DO: check if you need it
     private void Halt(NavMeshAgent navMeshAgent)
     {
         navMeshAgent.speed = 0f;
@@ -179,6 +187,24 @@ public class EnemyAI : MonoBehaviour
             //Debug.Log("There was a collider in between");
             return false;
         }
+    }
+
+    private void talkToAnotherAI(GameObject anotherAI) {
+        timer -= Time.deltaTime;
+        //Check if timer hasn't run out yet. If it hasn't, stop to chat.
+        if (timer > 0)
+        {
+            Halt(_navMeshAgent);
+            Halt(anotherAI.GetComponent<NavMeshAgent>());
+        }
+        //If it has, continue patrolling
+        else
+        {
+            Patrol(_navMeshAgent);
+            Patrol(anotherAI.GetComponent<NavMeshAgent>());
+        }
+        //Reset the timer for the next time they see each other - with delay
+        StartCoroutine(resetTimer());
     }
 
 }
