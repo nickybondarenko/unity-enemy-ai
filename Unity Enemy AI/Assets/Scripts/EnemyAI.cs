@@ -3,6 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+/*
+ * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games.
+ * Modifications by Bondarenko: expanding the code, adding functionality like patrol agents go to a halt,
+ * approach each other, reach on each other and other elements in the environment; about 80% of the code is
+ * original material.
+*/
 
 public class EnemyAI : MonoBehaviour
 {
@@ -88,7 +94,7 @@ public class EnemyAI : MonoBehaviour
 
     public void Update()
     {
-        //Check if we're close to the destination
+        //Check if we're close to the destination: waypoint
 
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
         {
@@ -111,8 +117,6 @@ public class EnemyAI : MonoBehaviour
         //If we're waiting
         if (_waiting) {
             _waitTimer += Time.deltaTime;
-            //Prevents the agent from clipping
-            //Halt(_navMeshAgent);
 
             if (_waitTimer >= _totalWaitTime) {
                 _waiting = false;
@@ -135,15 +139,15 @@ public class EnemyAI : MonoBehaviour
 
     }
 
-
+    //Wait for 20 seconds and reset the timer: prevents AI from "chatting" all the time
     private IEnumerator resetTimer()
     {
         yield return new WaitForSeconds(20f);
         timer = 10f;
     }
 
+
     //Patrolling speed set to enemySpeed indicated in the inspector
-    //Stopping distance set up for the agent who stops
     private void Patrol(NavMeshAgent navMeshAgent)
     {
         navMeshAgent.speed = _enemySpeed;
@@ -156,8 +160,7 @@ public class EnemyAI : MonoBehaviour
         navMeshAgent.speed = 0f;
     }
 
-
-
+    //Go to the next waypoint
     private void SetDestination()
     {
         if (_waypointsVisited > 0) {
@@ -172,59 +175,47 @@ public class EnemyAI : MonoBehaviour
         _travelling = true;
     }
 
-
+    //Checking if the current agent can see another object (another AI, or any other game object)
     private bool canSee(GameObject obj) {
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
         Debug.DrawLine(transform.position, obj.transform.position, Color.red);
         if (Physics.Raycast(ray, out hit, _maxRayDistance) && (hit.collider.tag == "Enemy AI"))
         {
-            //Debug.Log("You have hit " + obj.name);
             return true;
         }
         else
         {
-            //Debug.Log("There was a collider in between");
             return false;
         }
     }
 
+    //If the agent sees another agent, they will approach them and strike up a conversation
+    //There's a timer reset to prevent the agents from chatting eternally
     private void talkToAnotherAI(GameObject anotherAI) {
 
         timer -= Time.deltaTime;
-        //Check if timer hasn't run out yet. If it hasn't, stop to chat.
+        //Check if timer hasn't run out yet. If it hasn't, approach the other agent
+        //Stop the other agent from moving
         if (timer > 1)
         {
-            //Come closer to the other AI, but not too close
-            //Vector3 targetVector = anotherAI.transform.position;
-            //_navMeshAgent.SetDestination(targetVector);
-
-            
             Halt(anotherAI.GetComponent<NavMeshAgent>());
             comeOverTo(anotherAI);
 
-            Debug.Log("hi! would you like to chat for a bit?");
-            //Approach the other AI
-            //if (_navMeshAgent.remainingDistance <= 5f)
-            //{ 
-            //Halt(_navMeshAgent);
-            //}
         }
-        //If it has, continue patrolling
+        //If the timer ran out, continue patrolling
         else
         {
-            Debug.Log("ok bye");
             SetDestination();
-            Debug.Log("destination set");
             Patrol(_navMeshAgent);
             Patrol(anotherAI.GetComponent<NavMeshAgent>());
+
             //Reset the timer for the next time they see each other - with delay
             StartCoroutine(resetTimer());
         }
-        ////Reset the timer for the next time they see each other - with delay
-        //StartCoroutine(resetTimer());
     }
 
+    //Approaching another game object
     private void comeOverTo(GameObject obj) {
         Vector3 targetVector = obj.transform.position;
         _navMeshAgent.SetDestination(targetVector);
