@@ -32,7 +32,7 @@ public class EnemyAI : MonoBehaviour
     int _waypointsVisited;
     float _maxRayDistance = 15f;
 
-    private static float timer = 5f;
+    private static float timer = 10f;
 
     GameObject otherEnemyAI;
 
@@ -138,8 +138,8 @@ public class EnemyAI : MonoBehaviour
 
     private IEnumerator resetTimer()
     {
-        yield return new WaitForSeconds(10f);
-        timer = 5f;
+        yield return new WaitForSeconds(20f);
+        timer = 10f;
     }
 
     //Patrolling speed set to enemySpeed indicated in the inspector
@@ -190,21 +190,48 @@ public class EnemyAI : MonoBehaviour
     }
 
     private void talkToAnotherAI(GameObject anotherAI) {
+
         timer -= Time.deltaTime;
         //Check if timer hasn't run out yet. If it hasn't, stop to chat.
-        if (timer > 0)
+        if (timer > 1)
         {
-            Halt(_navMeshAgent);
+            //Come closer to the other AI, but not too close
+            //Vector3 targetVector = anotherAI.transform.position;
+            //_navMeshAgent.SetDestination(targetVector);
+
+            
             Halt(anotherAI.GetComponent<NavMeshAgent>());
+            comeOverTo(anotherAI);
+
+            Debug.Log("hi! would you like to chat for a bit?");
+            //Approach the other AI
+            //if (_navMeshAgent.remainingDistance <= 5f)
+            //{ 
+            //Halt(_navMeshAgent);
+            //}
         }
         //If it has, continue patrolling
         else
         {
+            Debug.Log("ok bye");
+            SetDestination();
+            Debug.Log("destination set");
             Patrol(_navMeshAgent);
             Patrol(anotherAI.GetComponent<NavMeshAgent>());
+            //Reset the timer for the next time they see each other - with delay
+            StartCoroutine(resetTimer());
         }
-        //Reset the timer for the next time they see each other - with delay
-        StartCoroutine(resetTimer());
+        ////Reset the timer for the next time they see each other - with delay
+        //StartCoroutine(resetTimer());
+    }
+
+    private void comeOverTo(GameObject obj) {
+        Vector3 targetVector = obj.transform.position;
+        _navMeshAgent.SetDestination(targetVector);
+        if (_navMeshAgent.remainingDistance <= 5f)
+        {
+            Halt(_navMeshAgent);
+        }
     }
 
 }
