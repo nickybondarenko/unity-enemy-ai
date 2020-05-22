@@ -23,8 +23,19 @@ public class EnemyAI : MonoBehaviour
     //This is where the functionality of Enemy AI will be: speed, aggressiveness, attention
     [Space]
 
+    [Header("Movement: AI speed")]
+    [Tooltip("Sets the AI patrolling/walking speed")]
     [SerializeField][Range(1,10)]
     float _enemySpeed = 3f;
+
+    [Header("Behaviour: other AI perception")]
+    [Tooltip("Determines whether this AI entity will force conversations with the other entity")]
+    [SerializeField]
+    bool _isTalkative;
+    [SerializeField]
+    [Tooltip("Length of chat in seconds")]
+    float _chatLength;
+
 
     //Private variables for base behaviour
     NavMeshAgent _navMeshAgent;
@@ -38,13 +49,14 @@ public class EnemyAI : MonoBehaviour
     int _waypointsVisited;
     float _maxRayDistance = 15f;
 
-    private static float timer = 10f;
+    private float timer;
 
     GameObject otherEnemyAI;
 
     public void Start()
     {
-
+        //Set up the timer
+        timer = _chatLength;
         //Remembering which Enemy AI entity is the "other one" for future references
         GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("Enemy AI");
 
@@ -130,20 +142,23 @@ public class EnemyAI : MonoBehaviour
         Patrol(_navMeshAgent);
 
         Debug.Log(timer);
-
+        //Check if this enemy is talkative
         //If the enemy can see the other enemy, they halt for 5 seconds and continue walking
-        if (canSee(otherEnemyAI))
+        if (_isTalkative)
         {
-            talkToAnotherAI(otherEnemyAI);
+            if (CanSee(otherEnemyAI))
+            {
+                TalkToAnotherAI();
+            }
         }
-
     }
 
+
     //Wait for 20 seconds and reset the timer: prevents AI from "chatting" all the time
-    private IEnumerator resetTimer()
+    private IEnumerator ResetTimer()
     {
         yield return new WaitForSeconds(20f);
-        timer = 10f;
+        timer = _chatLength;
     }
 
 
@@ -176,7 +191,8 @@ public class EnemyAI : MonoBehaviour
     }
 
     //Checking if the current agent can see another object (another AI, or any other game object)
-    private bool canSee(GameObject obj) {
+    private bool CanSee(GameObject obj)
+    {
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
         Debug.DrawLine(transform.position, obj.transform.position, Color.red);
@@ -192,31 +208,40 @@ public class EnemyAI : MonoBehaviour
 
     //If the agent sees another agent, they will approach them and strike up a conversation
     //There's a timer reset to prevent the agents from chatting eternally
-    private void talkToAnotherAI(GameObject anotherAI) {
+    private void TalkToAnotherAI()
+    {
 
+        Debug.Log("I see " + otherEnemyAI.gameObject.name);
         timer -= Time.deltaTime;
         //Check if timer hasn't run out yet. If it hasn't, approach the other agent
         //Stop the other agent from moving
         if (timer > 1)
-        {
-            Halt(anotherAI.GetComponent<NavMeshAgent>());
-            comeOverTo(anotherAI);
+        { 
+            Halt(otherEnemyAI.GetComponent<NavMeshAgent>());
+            Debug.Log(otherEnemyAI.gameObject.name + " is stopped");
+            ComeOverTo(otherEnemyAI);
+            Debug.Log("Approaching it");
 
         }
         //If the timer ran out, continue patrolling
-        else
+        if (timer <= 1)
         {
             SetDestination();
+
+            Debug.Log("destination was reset for " + this.gameObject.name);
+            Debug.Log(this.gameObject.name + "goes to " + _currentWaypoint.name);
+
             Patrol(_navMeshAgent);
-            Patrol(anotherAI.GetComponent<NavMeshAgent>());
+            Patrol(otherEnemyAI.GetComponent<NavMeshAgent>());
 
             //Reset the timer for the next time they see each other - with delay
-            StartCoroutine(resetTimer());
+            StartCoroutine(ResetTimer());
         }
     }
 
     //Approaching another game object
-    private void comeOverTo(GameObject obj) {
+    private void ComeOverTo(GameObject obj)
+    {
         Vector3 targetVector = obj.transform.position;
         _navMeshAgent.SetDestination(targetVector);
         if (_navMeshAgent.remainingDistance <= 5f)
