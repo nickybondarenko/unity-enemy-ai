@@ -49,6 +49,10 @@ public class EnemyAI : MonoBehaviour
     int _waypointsVisited;
     float _maxRayDistance = 15f;
 
+    float maxAngle = 45f;
+    //make public for adapting the view
+    float maxRadius = 3f;
+
     private float timer;
 
     GameObject otherEnemyAI;
@@ -106,8 +110,13 @@ public class EnemyAI : MonoBehaviour
 
     public void Update()
     {
-        //Check if we're close to the destination: waypoint
 
+
+
+
+
+
+        //Check if we're close to the destination: waypoint
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
         {
             _travelling = false;
@@ -195,7 +204,8 @@ public class EnemyAI : MonoBehaviour
     {
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
-        Debug.DrawLine(transform.position, obj.transform.position, Color.red);
+        //Draws a line from one AI to the other
+        //Debug.DrawLine(transform.position, obj.transform.position, Color.red);
         if (Physics.Raycast(ray, out hit, _maxRayDistance) && (hit.collider.tag == "Enemy AI"))
         {
             return true;
@@ -249,5 +259,26 @@ public class EnemyAI : MonoBehaviour
             Halt(_navMeshAgent);
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, maxRadius);
+
+        Vector3 fovLine1 = Quaternion.AngleAxis(maxAngle, transform.up) * transform.forward * maxRadius;
+        Vector3 fovLine2 = Quaternion.AngleAxis(-maxAngle, transform.up) * transform.forward * maxRadius;
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawRay(transform.position, fovLine1);
+        Gizmos.DrawRay(transform.position, fovLine2);
+
+        Gizmos.color = Color.red;
+//        Gizmos.DrawRay(transform.position, (otherEnemyAI.transform.position - transform.position).normalized * maxRadius);
+
+        Gizmos.color = Color.black;
+        Gizmos.DrawRay(transform.position, transform.forward * maxRadius);
+
+    }
+
 
 }
