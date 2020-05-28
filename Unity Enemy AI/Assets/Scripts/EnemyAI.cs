@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 /*
- * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games.
+ * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games. Field of view concept by AJ Tech.
  * Modifications by Bondarenko: expanding the code, adding functionality like patrol agents go to a halt,
- * approach each other, reach on each other and other elements in the environment; about 80% of the code is
- * original material.
+ * approach each other, reach on each other and other elements in the environment. Functionality and logic
+ * of field of view based on concept by AJ Tech.
 */
 
 public class EnemyAI : MonoBehaviour
@@ -28,6 +28,15 @@ public class EnemyAI : MonoBehaviour
     [SerializeField][Range(1,10)]
     float _enemySpeed = 3f;
 
+    [Header("Behaviour: general settings")]
+    [Tooltip("View angle for AI's perception")]
+    [SerializeField]
+    float _viewAngle = 45f;
+    [Tooltip("View radius for AI's perception")]
+    [SerializeField]
+    float _viewRadius = 3f;
+
+
     [Header("Behaviour: other AI perception")]
     [Tooltip("Determines whether this AI entity will force conversations with the other entity")]
     [SerializeField]
@@ -35,7 +44,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     [Tooltip("Length of chat in seconds")]
     float _chatLength;
-
+  
 
     //Private variables for base behaviour
     NavMeshAgent _navMeshAgent;
@@ -47,11 +56,7 @@ public class EnemyAI : MonoBehaviour
     bool _waiting;
     float _waitTimer;
     int _waypointsVisited;
-    float _maxRayDistance = 15f;
 
-    float maxAngle = 45f;
-    //make public for adapting the view
-    float maxRadius = 3f;
 
     private float timer;
 
@@ -155,8 +160,9 @@ public class EnemyAI : MonoBehaviour
         //If the enemy can see the other enemy, they halt for 5 seconds and continue walking
         if (_isTalkative)
         {
-            if (CanSee(otherEnemyAI))
+            if (CanSee(otherEnemyAI, "Enemy AI"))
             {
+                Debug.Log("I can see another AI");
                 TalkToAnotherAI();
             }
         }
@@ -200,18 +206,31 @@ public class EnemyAI : MonoBehaviour
     }
 
     //Checking if the current agent can see another object (another AI, or any other game object)
-    private bool CanSee(GameObject obj)
+    private bool CanSee(GameObject obj, String tag)
     {
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
-        //Draws a line from one AI to the other
-        //Debug.DrawLine(transform.position, obj.transform.position, Color.red);
-        if (Physics.Raycast(ray, out hit, _maxRayDistance) && (hit.collider.tag == "Enemy AI"))
+
+        float angleToObject = Vector3.Angle(this.transform.position, obj.transform.position);
+        Debug.DrawLine(this.transform.position, obj.transform.position, Color.blue);
+
+
+        if (_viewAngle > angleToObject)
         {
-            return true;
+            Debug.Log("In the view range");
+            //If there is an object in the radius and it's in the view
+                if (Physics.Raycast(ray, out hit, _viewRadius) && hit.collider.CompareTag(tag))
+                {
+                   return true;
+                }
+                else
+                {
+                    return false;
+                }
         }
         else
         {
+            Debug.Log("Not in the view range");
             return false;
         }
     }
@@ -262,11 +281,11 @@ public class EnemyAI : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, maxRadius);
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawWireSphere(transform.position, maxRadius);
 
-        Vector3 fovLine1 = Quaternion.AngleAxis(maxAngle, transform.up) * transform.forward * maxRadius;
-        Vector3 fovLine2 = Quaternion.AngleAxis(-maxAngle, transform.up) * transform.forward * maxRadius;
+        Vector3 fovLine1 = Quaternion.AngleAxis(_viewAngle, transform.up) * transform.forward * _viewRadius;
+        Vector3 fovLine2 = Quaternion.AngleAxis(-_viewAngle, transform.up) * transform.forward * _viewRadius;
 
         Gizmos.color = Color.blue;
         Gizmos.DrawRay(transform.position, fovLine1);
@@ -276,7 +295,7 @@ public class EnemyAI : MonoBehaviour
 //        Gizmos.DrawRay(transform.position, (otherEnemyAI.transform.position - transform.position).normalized * maxRadius);
 
         Gizmos.color = Color.black;
-        Gizmos.DrawRay(transform.position, transform.forward * maxRadius);
+        Gizmos.DrawRay(transform.position, transform.forward * _viewRadius);
 
     }
 
