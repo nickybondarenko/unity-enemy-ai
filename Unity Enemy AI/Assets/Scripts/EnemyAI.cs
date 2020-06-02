@@ -12,10 +12,6 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    //Dictates whether the agent waits on each node
-    [SerializeField]
-    bool _patrolWaiting;
-
     //The total time we wait at each node
     [SerializeField]
     float _totalWaitTime = 3f;
@@ -62,11 +58,12 @@ public class EnemyAI : MonoBehaviour
 
     GameObject otherEnemyAI;
 
+
     public void Start()
     {
         //Set up the timer
         timer = _chatLength;
-        //Remembering which Enemy AI entity is the "other one" for future references
+        //Remembering which Enemy AI entity is the "other one" for future references. ONLY WORKS FOR 2 ENEMY AIS
         GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("Enemy AI");
 
         if (enemyAIs[0].name == this.gameObject.name)
@@ -77,6 +74,8 @@ public class EnemyAI : MonoBehaviour
         {
             otherEnemyAI = enemyAIs[0];
         }
+
+
 
 
         //Working with NavMesh
@@ -109,63 +108,38 @@ public class EnemyAI : MonoBehaviour
                 Debug.Log("Insufficient patrol points for basic patrolling behaviour");
             }
         }
-
+        //Set the first destination
         SetDestination();
     }
 
     public void Update()
     {
 
-
-
-
-
-
-        //Check if we're close to the destination: waypoint
+        //Check if we're close to the destination: waypoint. If we are, reset the destination
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
         {
             _travelling = false;
             _waypointsVisited++;
-
-
-            //If we're going to wait, then wait.
-            if (_patrolWaiting)
-            {
-                _waiting = true;
-                _waitTimer = 0f;
-            }
-            else
-            {
-                SetDestination();
-            }
+          
+            SetDestination();
+            
         }
 
-        //If we're waiting
-        if (_waiting) {
-            _waitTimer += Time.deltaTime;
-
-            if (_waitTimer >= _totalWaitTime) {
-                _waiting = false;
-                Patrol(_navMeshAgent);
-
-                SetDestination();
-            }
-        }
-
-        //Starting the partolling behaviour
-        Patrol(_navMeshAgent);
-
-        Debug.Log(timer);
-        //Check if this enemy is talkative
-        //If the enemy can see the other enemy, they halt for 5 seconds and continue walking
-        if (_isTalkative)
+        //If I can see another enemy, check if I'm talkative
+        if (CanSee(otherEnemyAI, "Enemy AI"))
         {
-            if (CanSee(otherEnemyAI, "Enemy AI"))
+            if (_isTalkative)
             {
-                Debug.Log("I can see another AI");
+                //If I am, talk to the other AI
                 TalkToAnotherAI();
             }
         }
+
+        
+
+
+       // Debug.Log(timer);
+        
     }
 
 
@@ -208,6 +182,8 @@ public class EnemyAI : MonoBehaviour
     //Checking if the current agent can see another object (another AI, or any other game object)
     private bool CanSee(GameObject obj, String tag)
     {
+
+
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
 
@@ -217,7 +193,7 @@ public class EnemyAI : MonoBehaviour
 
         if (_viewAngle > angleToObject)
         {
-            Debug.Log("In the view range");
+            //Debug.Log("In the view range");
             //If there is an object in the radius and it's in the view
                 if (Physics.Raycast(ray, out hit, _viewRadius) && hit.collider.CompareTag(tag))
                 {
@@ -230,7 +206,7 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            Debug.Log("Not in the view range");
+            //Debug.Log("Not in the view range");
             return false;
         }
     }
