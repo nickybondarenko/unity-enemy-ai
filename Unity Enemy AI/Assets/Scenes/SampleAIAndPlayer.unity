@@ -180,7 +180,7 @@ GameObject:
   - component: {fileID: 11434734}
   - component: {fileID: 11434733}
   - component: {fileID: 11434732}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: EnemyAlice
   m_TagString: Enemy AI
   m_Icon: {fileID: 0}
@@ -225,6 +225,7 @@ MonoBehaviour:
   _enemySpeed: 3
   _viewAngle: 45
   _viewRadius: 3
+  _fieldOfView: {fileID: 193054532}
   _isTalkative: 0
   _chatLength: 10
 --- !u!65 &11434734
@@ -723,6 +724,98 @@ Transform:
   m_Father: {fileID: 1606999388}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 88.673004, y: -235.855, z: -222.349}
+--- !u!1 &193054529
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 193054533}
+  - component: {fileID: 193054532}
+  - component: {fileID: 193054531}
+  - component: {fileID: 193054530}
+  m_Layer: 0
+  m_Name: FieldOfView
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!23 &193054530
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193054529}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 27d57738093c2477e8ef93023514b4fd, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &193054531
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193054529}
+  m_Mesh: {fileID: 0}
+--- !u!114 &193054532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193054529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7757f9f3bdebd4e2883149ada7a25746, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &193054533
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193054529}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &218105531
 GameObject:
   m_ObjectHideFlags: 0
@@ -1563,7 +1656,7 @@ GameObject:
   - component: {fileID: 1126018538}
   - component: {fileID: 1126018542}
   - component: {fileID: 1126018543}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: EnemyBob
   m_TagString: Enemy AI
   m_Icon: {fileID: 0}
@@ -1660,6 +1753,7 @@ MonoBehaviour:
   _enemySpeed: 3
   _viewAngle: 60
   _viewRadius: 3
+  _fieldOfView: {fileID: 193054532}
   _isTalkative: 1
   _chatLength: 5
 --- !u!195 &1126018543

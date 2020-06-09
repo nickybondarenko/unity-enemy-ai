@@ -31,6 +31,8 @@ public class EnemyAI : MonoBehaviour
     [Tooltip("View radius for AI's perception")]
     [SerializeField]
     float _viewRadius = 3f;
+    [SerializeField]
+    private FieldOfView _fieldOfView;
 
 
     [Header("Behaviour: other AI perception")]
@@ -114,6 +116,10 @@ public class EnemyAI : MonoBehaviour
 
     public void Update()
     {
+        //Vector3 aimDir = (_currentWaypoint.transform.position - _previousWaypoint.transform.position).normalized;
+        //_fieldOfView.SetAimDirection(aimDir);
+        _fieldOfView.SetOrigin(transform.position);
+
 
         //Check if we're close to the destination: waypoint. If we are, reset the destination
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
@@ -135,10 +141,13 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
+        if (CanSee(gameObject, "Window"))
+        {
+            Debug.Log("I can see a window");
+        }
         
 
-
-       // Debug.Log(timer);
+        Debug.Log(timer);
         
     }
 
@@ -182,8 +191,6 @@ public class EnemyAI : MonoBehaviour
     //Checking if the current agent can see another object (another AI, or any other game object)
     private bool CanSee(GameObject obj, String tag)
     {
-
-
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
 
@@ -206,7 +213,7 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            //Debug.Log("Not in the view range");
+            Debug.Log("Not in the view range");
             return false;
         }
     }
