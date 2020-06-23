@@ -10,6 +10,7 @@ TagManager:
   - MedalsShelf
   - Painting
   - Window
+  - EnemyAI
   layers:
   - Default
   - TransparentFX
@@ -19,12 +20,12 @@ TagManager:
   - UI
   - 
   - 
-  - AI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Enemy AI
+  - Level
+  - Windows
+  - Painting
+  - Shelf
+  - Another AI
   - 
   - 
   - 

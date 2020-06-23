@@ -31,8 +31,7 @@ public class EnemyAI : MonoBehaviour
     [Tooltip("View radius for AI's perception")]
     [SerializeField]
     float _viewRadius = 3f;
-    [SerializeField]
-    private FieldOfView _fieldOfView;
+
 
 
     [Header("Behaviour: other AI perception")]
@@ -60,13 +59,15 @@ public class EnemyAI : MonoBehaviour
 
     GameObject otherEnemyAI;
 
+    GameObject objectInTriggerZone;
+
 
     public void Start()
     {
         //Set up the timer
         timer = _chatLength;
         //Remembering which Enemy AI entity is the "other one" for future references. ONLY WORKS FOR 2 ENEMY AIS
-        GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("Enemy AI");
+        GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("EnemyAI");
 
         if (enemyAIs[0].name == this.gameObject.name)
         {
@@ -116,11 +117,6 @@ public class EnemyAI : MonoBehaviour
 
     public void Update()
     {
-        //Vector3 aimDir = (_currentWaypoint.transform.position - _previousWaypoint.transform.position).normalized;
-        //_fieldOfView.SetAimDirection(aimDir);
-        _fieldOfView.SetOrigin(transform.position);
-
-
         //Check if we're close to the destination: waypoint. If we are, reset the destination
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
         {
@@ -132,7 +128,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         //If I can see another enemy, check if I'm talkative
-        if (CanSee(otherEnemyAI, "Enemy AI"))
+        if (CanSee(otherEnemyAI, "EnemyAI"))
         {
             if (_isTalkative)
             {
@@ -141,17 +137,18 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
-        if (CanSee(gameObject, "Window"))
-        {
-            Debug.Log("I can see a window");
-        }
-        
-
         Debug.Log(timer);
         
+
     }
 
-
+    private void OnTriggerEnter(Collider other) {
+        Debug.Log("I can see something! It's " + other.gameObject.name);
+    }
+    
+    // private void OnCollisionEnter(Collision other) {
+    //     Debug.Log("Something collided with me! It's " + other.gameObject.name);
+    // }
     //Wait for 20 seconds and reset the timer: prevents AI from "chatting" all the time
     private IEnumerator ResetTimer()
     {
@@ -195,7 +192,7 @@ public class EnemyAI : MonoBehaviour
         RaycastHit hit;
 
         float angleToObject = Vector3.Angle(this.transform.position, obj.transform.position);
-        Debug.DrawLine(this.transform.position, obj.transform.position, Color.blue);
+        //Debug.DrawLine(this.transform.position, obj.transform.position, Color.blue);
 
 
         if (_viewAngle > angleToObject)
@@ -213,10 +210,11 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            Debug.Log("Not in the view range");
+            //Debug.Log("Not in the view range");
             return false;
         }
     }
+
 
     //If the agent sees another agent, they will approach them and strike up a conversation
     //There's a timer reset to prevent the agents from chatting eternally
@@ -241,7 +239,7 @@ public class EnemyAI : MonoBehaviour
             SetDestination();
 
             Debug.Log("destination was reset for " + this.gameObject.name);
-            Debug.Log(this.gameObject.name + "goes to " + _currentWaypoint.name);
+            Debug.Log(this.gameObject.name + " goes to " + _currentWaypoint.name);
 
             Patrol(_navMeshAgent);
             Patrol(otherEnemyAI.GetComponent<NavMeshAgent>());
