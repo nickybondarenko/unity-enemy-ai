@@ -226,9 +226,11 @@ MonoBehaviour:
   _totalWaitTime: 3
   _enemySpeed: 3
   _viewAngle: 45
-  _viewRadius: 3
+  _viewRadius: 5
   _isTalkative: 0
   _chatLength: 10
+  _interactsWithWindows: 1
+  _interactionLength: 5
 --- !u!135 &11434734
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1158,6 +1160,7 @@ GameObject:
   - component: {fileID: 804208447}
   - component: {fileID: 804208446}
   - component: {fileID: 804208450}
+  - component: {fileID: 804208451}
   m_Layer: 10
   m_Name: Window (2)
   m_TagString: Window
@@ -1174,7 +1177,7 @@ BoxCollider:
   m_GameObject: {fileID: 804208445}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1255,6 +1258,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!135 &804208451
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 804208445}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5454533
+  m_Center: {x: 0.04545323, y: -0.000000052383566, z: -4.9653766e-15}
 --- !u!1 &804885098
 GameObject:
   m_ObjectHideFlags: 0
@@ -1268,6 +1284,7 @@ GameObject:
   - component: {fileID: 804885100}
   - component: {fileID: 804885099}
   - component: {fileID: 804885103}
+  - component: {fileID: 804885104}
   m_Layer: 10
   m_Name: Window (1)
   m_TagString: Window
@@ -1284,7 +1301,7 @@ BoxCollider:
   m_GameObject: {fileID: 804885098}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1365,6 +1382,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!135 &804885104
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 804885098}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5995214
+  m_Center: {x: 0.09952147, y: -0.00000010476713, z: 0}
 --- !u!1 &832742466
 GameObject:
   m_ObjectHideFlags: 0
@@ -1742,9 +1772,11 @@ MonoBehaviour:
   _totalWaitTime: 3
   _enemySpeed: 3
   _viewAngle: 60
-  _viewRadius: 3
-  _isTalkative: 1
+  _viewRadius: 5
+  _isTalkative: 0
   _chatLength: 3
+  _interactsWithWindows: 0
+  _interactionLength: 0
 --- !u!195 &1126018543
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -3129,6 +3161,7 @@ GameObject:
   - component: {fileID: 1960011351}
   - component: {fileID: 1960011350}
   - component: {fileID: 1960011354}
+  - component: {fileID: 1960011355}
   m_Layer: 10
   m_Name: Window
   m_TagString: Window
@@ -3145,7 +3178,7 @@ BoxCollider:
   m_GameObject: {fileID: 1960011349}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -3226,6 +3259,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!135 &1960011355
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1960011349}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.6449555
+  m_Center: {x: 0.06643795, y: 0, z: 1.9800512}
 --- !u!1 &1965409389
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 /*
- * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games. Field of view concept by AJ Tech.
+ * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games. 
  * Modifications by Bondarenko: expanding the code, adding functionality like patrol agents go to a halt,
- * approach each other, reach on each other and other elements in the environment. Functionality and logic
- * of field of view based on concept by AJ Tech.
+ * approach each other, reach on each other and other elements in the environment. 
+ * ADD COPYRIGHT
 */
 
 public class EnemyAI : MonoBehaviour
@@ -41,6 +41,12 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     [Tooltip("Length of chat in seconds")]
     float _chatLength;
+
+    [Header("Behaviour: interaction with other objects")]
+    [SerializeField]
+    bool _interactsWithWindows;
+    [SerializeField]
+    float _interactionLength;
   
 
     //Private variables for base behaviour
@@ -56,27 +62,29 @@ public class EnemyAI : MonoBehaviour
 
 
     private float timer;
+    private float interactionTimer;
+    private GameObject objectOfInterest;
 
-    GameObject otherEnemyAI;
+    private GameObject otherEnemyAI;
 
-    GameObject objectInTriggerZone;
-
+    private GameObject interactableObject;
 
     public void Start()
     {
-        //Set up the timer
+        //Set up the timers
         timer = _chatLength;
+        interactionTimer = _interactionLength;
         //Remembering which Enemy AI entity is the "other one" for future references. ONLY WORKS FOR 2 ENEMY AIS
-        GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("EnemyAI");
+        // GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("EnemyAI");
 
-        if (enemyAIs[0].name == this.gameObject.name)
-        {
-            otherEnemyAI = enemyAIs[1];
-        }
-        else
-        {
-            otherEnemyAI = enemyAIs[0];
-        }
+        // if (enemyAIs[0].name == this.gameObject.name)
+        // {
+        //     otherEnemyAI = enemyAIs[1];
+        // }
+        // else
+        // {
+        //     otherEnemyAI = enemyAIs[0];
+        // }
 
 
 
@@ -127,8 +135,8 @@ public class EnemyAI : MonoBehaviour
             
         }
 
-        //If I can see another enemy, check if I'm talkative
-        if (CanSee(otherEnemyAI, "EnemyAI"))
+        // //If I can see another enemy, check if I'm talkative
+        if (CanSee(otherEnemyAI))
         {
             if (_isTalkative)
             {
@@ -137,23 +145,47 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
-        Debug.Log(timer);
-        
+        if (CanSee(interactableObject))
+        {
+            // Debug.Log("I can see an interactable object");
+
+            if (interactableObject.CompareTag("Window") && _interactsWithWindows)
+            {
+                Debug.Log("I can see and interact with windows");
+                objectOfInterest = interactableObject;
+                checkObjectOut();
+            }
+
+        }
+        //Debug.Log(timer);
+        Debug.Log(interactionTimer);
+
 
     }
+
 
     private void OnTriggerEnter(Collider other) {
-        Debug.Log("I can see something! It's " + other.gameObject.name);
+        // if (this.name == "EnemyAlice"){
+        // Debug.Log("I can see something! It's " + other.gameObject.name);
+        // }
+        //Check if the gameObject triggering is another AI
+        if (other.gameObject.tag == "EnemyAI" && other.gameObject != this)
+        {
+            otherEnemyAI = other.gameObject;
+            // Debug.Log("Other enemy AI set correctly");
+        }
+        else 
+        {
+            interactableObject = other.gameObject;
+            // Debug.Log("Interactable object set to " + other.gameObject.name);
+        }
     }
-    
-    // private void OnCollisionEnter(Collision other) {
-    //     Debug.Log("Something collided with me! It's " + other.gameObject.name);
-    // }
-    //Wait for 20 seconds and reset the timer: prevents AI from "chatting" all the time
+
     private IEnumerator ResetTimer()
     {
         yield return new WaitForSeconds(20f);
         timer = _chatLength;
+        interactionTimer = _interactionLength;
     }
 
 
@@ -186,7 +218,7 @@ public class EnemyAI : MonoBehaviour
     }
 
     //Checking if the current agent can see another object (another AI, or any other game object)
-    private bool CanSee(GameObject obj, String tag)
+    private bool CanSee(GameObject obj)
     {
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
@@ -199,7 +231,7 @@ public class EnemyAI : MonoBehaviour
         {
             //Debug.Log("In the view range");
             //If there is an object in the radius and it's in the view
-                if (Physics.Raycast(ray, out hit, _viewRadius) && hit.collider.CompareTag(tag))
+                if (Physics.Raycast(ray, out hit, _viewRadius) && hit.collider.CompareTag(obj.tag))
                 {
                    return true;
                 }
@@ -249,12 +281,29 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+     private void checkObjectOut(){
+        interactionTimer -= Time.deltaTime;
+        if (interactionTimer > 1)
+        {
+            ComeOverTo(objectOfInterest);
+            Debug.Log("Approaching " + objectOfInterest.name);
+        }
+        
+        if (interactionTimer <= 1)
+        {
+            Debug.Log("Continuing patrol");
+            SetDestination();
+            Patrol(_navMeshAgent);
+            StartCoroutine(ResetTimer());
+        }
+    }
+
     //Approaching another game object
     private void ComeOverTo(GameObject obj)
     {
         Vector3 targetVector = obj.transform.position;
         _navMeshAgent.SetDestination(targetVector);
-        if (_navMeshAgent.remainingDistance <= 5f)
+        if (_navMeshAgent.remainingDistance <= 2f)
         {
             Halt(_navMeshAgent);
         }
