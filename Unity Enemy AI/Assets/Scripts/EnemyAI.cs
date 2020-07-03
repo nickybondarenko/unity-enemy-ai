@@ -46,6 +46,10 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     bool _interactsWithWindows;
     [SerializeField]
+    bool _interactsWithPainting;
+    [SerializeField]
+    bool _interactsWithShelf;
+    [SerializeField]
     float _interactionLength;
   
 
@@ -148,16 +152,27 @@ public class EnemyAI : MonoBehaviour
         if (CanSee(interactableObject))
         {
             // Debug.Log("I can see an interactable object");
+            objectOfInterest = interactableObject;
 
-            if (interactableObject.CompareTag("Window") && _interactsWithWindows)
+            if (objectOfInterest.CompareTag("Window") && _interactsWithWindows)
             {
                 Debug.Log("I can see and interact with windows");
-                objectOfInterest = interactableObject;
+                
+                checkObjectOut();
+            }
+
+            if (objectOfInterest.CompareTag("Painting") && _interactsWithPainting)
+            {
+                checkObjectOut();
+            }
+
+            if (objectOfInterest.CompareTag("MedalsShelf") && _interactsWithShelf)
+            {
                 checkObjectOut();
             }
 
         }
-        //Debug.Log(timer);
+        Debug.Log(timer);
         Debug.Log(interactionTimer);
 
 
@@ -277,6 +292,7 @@ public class EnemyAI : MonoBehaviour
             Patrol(otherEnemyAI.GetComponent<NavMeshAgent>());
 
             //Reset the timer for the next time they see each other - with delay
+            interactionTimer = 0;
             StartCoroutine(ResetTimer());
         }
     }
@@ -286,14 +302,15 @@ public class EnemyAI : MonoBehaviour
         if (interactionTimer > 1)
         {
             ComeOverTo(objectOfInterest);
-            Debug.Log("Approaching " + objectOfInterest.name);
+            // Debug.Log("Approaching " + objectOfInterest.name + " and halting.....");
         }
         
         if (interactionTimer <= 1)
         {
-            Debug.Log("Continuing patrol");
+            // Debug.Log("Continuing patrol");
             SetDestination();
             Patrol(_navMeshAgent);
+            timer = 0;
             StartCoroutine(ResetTimer());
         }
     }
