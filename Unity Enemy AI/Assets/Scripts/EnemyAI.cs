@@ -198,7 +198,7 @@ public class EnemyAI : MonoBehaviour
 
     private IEnumerator ResetTimer()
     {
-        yield return new WaitForSeconds(20f);
+        yield return new WaitForSeconds(30f);
         timer = _chatLength;
         interactionTimer = _interactionLength;
     }
