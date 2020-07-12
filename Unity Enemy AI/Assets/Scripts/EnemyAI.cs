@@ -70,14 +70,15 @@ public class EnemyAI : MonoBehaviour
     private GameObject objectOfInterest;
 
     private GameObject otherEnemyAI;
-
     private GameObject interactableObject;
+    private GameObject playerSimAI;
 
     public void Start()
     {
         //Set up the timers
         timer = _chatLength;
         interactionTimer = _interactionLength;
+        playerSimAI = GameObject.FindGameObjectWithTag("OtherAI");
         //Remembering which Enemy AI entity is the "other one" for future references. ONLY WORKS FOR 2 ENEMY AIS
         // GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("EnemyAI");
 
@@ -149,6 +150,13 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
+        // if the gameObject I see is another AI
+        if (CanSee(playerSimAI))
+        {
+            Debug.Log("I can see a rat!!");
+        }
+
+        // if the gameObject I see is interactable
         if (CanSee(interactableObject))
         {
             // Debug.Log("I can see an interactable object");
@@ -160,7 +168,6 @@ public class EnemyAI : MonoBehaviour
                 
                 checkObjectOut();
             }
-
             if (objectOfInterest.CompareTag("Painting") && _interactsWithPainting)
             {
                 checkObjectOut();
@@ -189,7 +196,11 @@ public class EnemyAI : MonoBehaviour
             otherEnemyAI = other.gameObject;
             // Debug.Log("Other enemy AI set correctly");
         }
-        else 
+        // else if (other.gameObject.tag == "OtherAI")
+        // {
+        //     playerSimAI = other.gameObject;
+        // }
+        else
         {
             interactableObject = other.gameObject;
             // Debug.Log("Interactable object set to " + other.gameObject.name);
