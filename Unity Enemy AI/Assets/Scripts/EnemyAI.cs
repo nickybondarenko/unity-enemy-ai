@@ -23,6 +23,8 @@ public class EnemyAI : MonoBehaviour
     [Tooltip("Sets the AI patrolling/walking speed")]
     [SerializeField][Range(1,10)]
     float _enemySpeed = 3f;
+    [SerializeField][Range(1,15)]
+    float _maxSpeed = 7f;
 
     [Header("Behaviour: general settings")]
     [Tooltip("View angle for AI's perception")]
@@ -58,7 +60,7 @@ public class EnemyAI : MonoBehaviour
     ConnectedWaypoint _currentWaypoint;
     ConnectedWaypoint _previousWaypoint;
 
-    
+    public GameObject playerSimAIPrefab;
     bool _travelling;
     bool _waiting;
     float _waitTimer;
@@ -73,25 +75,15 @@ public class EnemyAI : MonoBehaviour
     private GameObject interactableObject;
     private GameObject playerSimAI;
 
-    public void Start()
-    {
-        //Set up the timers
+    private void Awake() {
+        //Setup timers
         timer = _chatLength;
         interactionTimer = _interactionLength;
+        //Set initial player AI simulator
         playerSimAI = GameObject.FindGameObjectWithTag("OtherAI");
-        //Remembering which Enemy AI entity is the "other one" for future references. ONLY WORKS FOR 2 ENEMY AIS
-        // GameObject[] enemyAIs = GameObject.FindGameObjectsWithTag("EnemyAI");
-
-        // if (enemyAIs[0].name == this.gameObject.name)
-        // {
-        //     otherEnemyAI = enemyAIs[1];
-        // }
-        // else
-        // {
-        //     otherEnemyAI = enemyAIs[0];
-        // }
-
-
+    }
+    public void Start()
+    {
 
 
         //Working with NavMesh
@@ -150,11 +142,20 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
+
+
         // if the gameObject I see is another AI
         if (CanSee(playerSimAI))
         {
-            Debug.Log("I can see a rat!!");
+            Debug.Log("I can see a rat");
+            _travelling = false;
+            Hunt(playerSimAI);
+
+            GameObject respawn = GameObject.FindGameObjectWithTag("Respawn");
+            playerSimAI.transform.position = respawn.transform.position;
+            playerSimAI.SetActive(true);
         }
+
 
         // if the gameObject I see is interactable
         if (CanSee(interactableObject))
@@ -164,7 +165,7 @@ public class EnemyAI : MonoBehaviour
 
             if (objectOfInterest.CompareTag("Window") && _interactsWithWindows)
             {
-                Debug.Log("I can see and interact with windows");
+                // Debug.Log("I can see and interact with windows");
                 
                 checkObjectOut();
             }
@@ -179,9 +180,9 @@ public class EnemyAI : MonoBehaviour
             }
 
         }
+
         Debug.Log(timer);
         Debug.Log(interactionTimer);
-
 
     }
 
@@ -335,6 +336,24 @@ public class EnemyAI : MonoBehaviour
         {
             Halt(_navMeshAgent);
         }
+    }
+
+    private void Hunt(GameObject prey)
+    {
+        // Debug.Log(" my prey is " + prey.name);
+        _navMeshAgent.speed = _maxSpeed;
+        _navMeshAgent.SetDestination(prey.transform.position);
+        if (_navMeshAgent.remainingDistance <= 1f)
+        {
+            prey.SetActive(false);
+            _travelling = true;
+           
+        }
+        // if (! CanSee(prey))
+        // {
+        //     Halt(_navMeshAgent);
+        //    SetDestination();
+        // }
     }
 
     private void OnDrawGizmos()
