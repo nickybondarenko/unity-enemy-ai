@@ -5,18 +5,15 @@ using UnityEngine;
 using UnityEngine.AI;
 /*
  * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games. 
- * Modifications by Bondarenko: expanding the code, adding functionality like patrol agents go to a halt,
+ * Modifications by Bondarenko to waypoints and patrolling logic:
+ * expanding the code, adding functionality like patrol agents go to a halt,
  * approach each other, reach on each other and other elements in the environment. 
  * ADD COPYRIGHT
 */
 
 public class EnemyAI : MonoBehaviour
 {
-    //The total time we wait at each node
-    [SerializeField]
-    float _totalWaitTime = 3f;
-
-    //This is where the functionality of Enemy AI will be: speed, aggressiveness, attention
+    //This is where the functionality of Enemy AI will be: speed, attention and other behaviours
     [Space]
 
     [Header("Movement: AI speed")]
@@ -34,8 +31,6 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     float _viewRadius = 3f;
 
-
-
     [Header("Behaviour: other AI perception")]
     [Tooltip("Determines whether this AI entity will force conversations with the other entity")]
     [SerializeField]
@@ -45,6 +40,7 @@ public class EnemyAI : MonoBehaviour
     float _chatLength;
 
     [Header("Behaviour: interaction with other objects")]
+    [Tooltip("Adjust to create a unique AI entity")]
     [SerializeField]
     bool _interactsWithWindows;
     [SerializeField]
@@ -52,41 +48,40 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     bool _interactsWithShelf;
     [SerializeField]
+    [Tooltip("For how long AI interacts with a game object in the scene, in seconds")]
     float _interactionLength;
-  
 
     //Private variables for base behaviour
     NavMeshAgent _navMeshAgent;
     ConnectedWaypoint _currentWaypoint;
     ConnectedWaypoint _previousWaypoint;
-
-    public GameObject playerSimAIPrefab;
+    private GameObject objectOfInterest;
+    private GameObject otherEnemyAI;
+    private GameObject interactableObject;
+    private GameObject playerSimAI;
     bool _travelling;
     bool _waiting;
     float _waitTimer;
     int _waypointsVisited;
 
-
+    //Timers
     private float timer;
     private float interactionTimer;
-    private GameObject objectOfInterest;
 
-    private GameObject otherEnemyAI;
-    private GameObject interactableObject;
-    private GameObject playerSimAI;
-
-    private void Awake() {
+    private void Awake() 
+    {
         //Setup timers
         timer = _chatLength;
         interactionTimer = _interactionLength;
-        //Set initial player AI simulator
+        //Set initial player AI simulator. For this setting, these should only be one player AI simulator
+        //If more playerSimAI need to be taking into consideration, playerSimAI variable shound be assigned in
+        //OnTriggerEnter method (as were otherEnemyAI and interactableObject)
         playerSimAI = GameObject.FindGameObjectWithTag("OtherAI");
     }
+
     public void Start()
     {
-
-
-        //Working with NavMesh
+        //The waypoint logic. Based on the code by Table Flip Games (See Copyright above)
         _navMeshAgent = this.GetComponent<NavMeshAgent>();
 
         if (_navMeshAgent == null)
@@ -97,15 +92,17 @@ public class EnemyAI : MonoBehaviour
         {
             if (_currentWaypoint == null)
             {
-                //Set it as random
+                //If the next waypoint hasn't been set yet, set it as a random waypoint from the array of waypoints
                 GameObject[] allWaypoints = GameObject.FindGameObjectsWithTag("Waypoint");
-
-                if (allWaypoints.Length > 0) {
-                    while (_currentWaypoint == null) {
+                if (allWaypoints.Length > 0) 
+                {
+                    while (_currentWaypoint == null) 
+                    {
                         int random = UnityEngine.Random.Range(0, allWaypoints.Length);
                         ConnectedWaypoint startingWaypoint = allWaypoints[random].GetComponent<ConnectedWaypoint>();
 
-                        if (startingWaypoint != null) {
+                        if (startingWaypoint != null)
+                        {
                             _currentWaypoint = startingWaypoint;
                         }
                     }
@@ -122,51 +119,49 @@ public class EnemyAI : MonoBehaviour
 
     public void Update()
     {
-        //Check if we're close to the destination: waypoint. If we are, reset the destination
+        //Check if we're close to the waypoint. If we are, reset the destination to a new waypoint
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
         {
             _travelling = false;
             _waypointsVisited++;
           
             SetDestination();
-            
         }
 
-        // //If I can see another enemy, check if I'm talkative
+        //If active AI can see another enemy, check if its talkative
         if (CanSee(otherEnemyAI))
         {
             if (_isTalkative)
             {
-                //If I am, talk to the other AI
+                //If it is, talk to the other AI
                 TalkToAnotherAI();
             }
         }
 
 
 
-        // if the gameObject I see is another AI
+        //If the gameObject AI sees is player simulator
         if (CanSee(playerSimAI))
         {
-            Debug.Log("I can see a rat");
             _travelling = false;
             Hunt(playerSimAI);
 
+            //Respawning player simulator to continue the simulation
             GameObject respawn = GameObject.FindGameObjectWithTag("Respawn");
             playerSimAI.transform.position = respawn.transform.position;
             playerSimAI.SetActive(true);
         }
 
 
-        // if the gameObject I see is interactable
+        //If the gameObject AI sees is interactable
         if (CanSee(interactableObject))
         {
-            // Debug.Log("I can see an interactable object");
             objectOfInterest = interactableObject;
 
+            //These statements are placeholders for custom animation or any other types of custom interaction with
+            //separate objects
             if (objectOfInterest.CompareTag("Window") && _interactsWithWindows)
             {
-                // Debug.Log("I can see and interact with windows");
-                
                 checkObjectOut();
             }
             if (objectOfInterest.CompareTag("Painting") && _interactsWithPainting)
@@ -188,23 +183,14 @@ public class EnemyAI : MonoBehaviour
 
 
     private void OnTriggerEnter(Collider other) {
-        // if (this.name == "EnemyAlice"){
-        // Debug.Log("I can see something! It's " + other.gameObject.name);
-        // }
-        //Check if the gameObject triggering is another AI
+        //Check if the gameObject entering the trigger is another AI
         if (other.gameObject.tag == "EnemyAI" && other.gameObject != this)
         {
             otherEnemyAI = other.gameObject;
-            // Debug.Log("Other enemy AI set correctly");
         }
-        // else if (other.gameObject.tag == "OtherAI")
-        // {
-        //     playerSimAI = other.gameObject;
-        // }
         else
         {
             interactableObject = other.gameObject;
-            // Debug.Log("Interactable object set to " + other.gameObject.name);
         }
     }
 
