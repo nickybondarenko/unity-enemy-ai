@@ -1,5 +1,6 @@
 ﻿/*
-* COPYRIGHT: code by Veronika Bondarenko
+* Copyright 2020, code by Veronika Bondarenko
+* This file is a part of AI in games Bachelor thesis project
 */
 using System.Collections;
 using System.Collections.Generic;

@@ -1,5 +1,6 @@
 ﻿/*
-* COPYRIGHT: Waypoint logic by Table Flip
+* Copyright 2020, Waypoint logic by Table Flip Games
+* This file is a part of AI in games Bachelor thesis project
 */
 using System.Collections;
 using System.Collections.Generic;

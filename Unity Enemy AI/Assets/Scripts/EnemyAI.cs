@@ -1,10 +1,12 @@
 ﻿/*
- * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games. 
+ * Copyright 2020
+ * Waypoint and patrolling logic by Table Flip Games. 
  * Modifications by Veronika Bondarenko to waypoints and patrolling logic:
  * expanding the code, adding functionality like patrol agents go to a halt,
  * approach each other, reach on each other and other elements in the environment. 
  * Timer, field of view, interaction, perception, behaviours and all the other 
  * logic by Veronika Bondarenko.
+ * This file is a part of AI in games Bachelor thesis project
 */
 
 using System;

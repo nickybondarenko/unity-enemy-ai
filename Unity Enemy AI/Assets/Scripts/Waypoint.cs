@@ -1,5 +1,6 @@
 ﻿/*
-* COPYRIGHT: visualization of waypoints by Table Flip Games
+* Copyright 2020: visualization of waypoints by Table Flip Games
+* This file is a part of AI in games Bachelor thesis project
 */
 using System.Collections;
 using System.Collections.Generic;

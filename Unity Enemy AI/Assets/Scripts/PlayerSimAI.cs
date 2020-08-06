@@ -6,7 +6,6 @@ using UnityEngine.AI;
 
 public class PlayerSimAI : MonoBehaviour
 {
-    // Start is called before the first frame update
     [SerializeField]
     float _speed;
     NavMeshAgent _navMeshAgent;
@@ -54,7 +53,6 @@ public class PlayerSimAI : MonoBehaviour
         SetDestination();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
@@ -70,7 +68,6 @@ public class PlayerSimAI : MonoBehaviour
      private void SetDestination()
     {
         if (_waypointsVisited > 0) {
-            //To maintain where I've just been and where I'm going
             ConnectedWaypoint nextWaypoint = _currentWaypoint.NextWaypoint(_previousWaypoint);
             _previousWaypoint = _currentWaypoint;
             _currentWaypoint = nextWaypoint;
