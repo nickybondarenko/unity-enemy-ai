@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿/*
+* COPYRIGHT: Waypoint logic by Table Flip
+*/
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +12,6 @@ public class ConnectedWaypoint : Waypoint
 
     List<ConnectedWaypoint> _connections;
 
-    // Start is called before the first frame update
     void Start()
     {
         //Grab all the objects with Waypoint tag in the scene

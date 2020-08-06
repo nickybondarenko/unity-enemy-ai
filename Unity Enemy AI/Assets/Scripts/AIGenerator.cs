@@ -1,11 +1,15 @@
-﻿using System.Collections;
+﻿/*
+* COPYRIGHT: code by Veronika Bondarenko
+*/
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class AIGenerator : MonoBehaviour
 {
     public GameObject EnemyAI;
-    // Start is called before the first frame update
+    
+    // This generator can be called for testing purposes
     void Start()
     {
         for (int i = 0; i < 300; i++)

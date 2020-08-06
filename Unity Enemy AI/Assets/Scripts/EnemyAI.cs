@@ -1,19 +1,21 @@
-﻿using System;
+﻿/*
+ * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games. 
+ * Modifications by Veronika Bondarenko to waypoints and patrolling logic:
+ * expanding the code, adding functionality like patrol agents go to a halt,
+ * approach each other, reach on each other and other elements in the environment. 
+ * Timer, field of view, interaction, perception, behaviours and all the other 
+ * logic by Veronika Bondarenko.
+*/
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-/*
- * COPYRIGHT: Waypoint and patrolling logic by Table Flip Games. 
- * Modifications by Bondarenko to waypoints and patrolling logic:
- * expanding the code, adding functionality like patrol agents go to a halt,
- * approach each other, reach on each other and other elements in the environment. 
- * ADD COPYRIGHT
-*/
 
 public class EnemyAI : MonoBehaviour
 {
-    //This is where the functionality of Enemy AI will be: speed, attention and other behaviours
+    // This is where the functionality of Enemy AI will be: speed, attention and other behaviours
     [Space]
 
     [Header("Movement: AI speed")]
@@ -51,7 +53,7 @@ public class EnemyAI : MonoBehaviour
     [Tooltip("For how long AI interacts with a game object in the scene, in seconds")]
     float _interactionLength;
 
-    //Private variables for base behaviour
+    // Private variables for base behaviour
     NavMeshAgent _navMeshAgent;
     ConnectedWaypoint _currentWaypoint;
     ConnectedWaypoint _previousWaypoint;
@@ -64,24 +66,27 @@ public class EnemyAI : MonoBehaviour
     float _waitTimer;
     int _waypointsVisited;
 
-    //Timers
+    // Timers
     private float timer;
     private float interactionTimer;
 
     private void Awake() 
     {
-        //Setup timers
+        // Setup timers
         timer = _chatLength;
         interactionTimer = _interactionLength;
-        //Set initial player AI simulator. For this setting, these should only be one player AI simulator
-        //If more playerSimAI need to be taking into consideration, playerSimAI variable shound be assigned in
-        //OnTriggerEnter method (as were otherEnemyAI and interactableObject)
+        // Set initial player AI simulator. For this setting, these should only be one player AI simulator
+        // If more playerSimAI need to be taking into consideration, playerSimAI variable shound be assigned in
+        // OnTriggerEnter method (as were otherEnemyAI and interactableObject)
         playerSimAI = GameObject.FindGameObjectWithTag("OtherAI");
+        // Set initial reference to the other Enemy AI entity. This variable will be updated
+        // if another Enemy AI entity enters the Trigger Collider zone
+        otherEnemyAI = GameObject.FindGameObjectWithTag("EnemyAI");
     }
 
     public void Start()
     {
-        //The waypoint logic. Based on the code by Table Flip Games (See Copyright above)
+        // The waypoint logic. Based on the code by Table Flip Games (See Copyright above)
         _navMeshAgent = this.GetComponent<NavMeshAgent>();
 
         if (_navMeshAgent == null)
@@ -92,7 +97,7 @@ public class EnemyAI : MonoBehaviour
         {
             if (_currentWaypoint == null)
             {
-                //If the next waypoint hasn't been set yet, set it as a random waypoint from the array of waypoints
+                // If the next waypoint hasn't been set yet, set it as a random waypoint from the array of waypoints
                 GameObject[] allWaypoints = GameObject.FindGameObjectsWithTag("Waypoint");
                 if (allWaypoints.Length > 0) 
                 {
@@ -113,13 +118,13 @@ public class EnemyAI : MonoBehaviour
                 Debug.Log("Insufficient patrol points for basic patrolling behaviour");
             }
         }
-        //Set the first destination
+        // Set the first destination
         SetDestination();
     }
 
     public void Update()
     {
-        //Check if we're close to the waypoint. If we are, reset the destination to a new waypoint
+        // Check if we're close to the waypoint. If we are, reset the destination to a new waypoint
         if (_travelling && _navMeshAgent.remainingDistance <= 1.0f)
         {
             _travelling = false;
@@ -128,38 +133,38 @@ public class EnemyAI : MonoBehaviour
             SetDestination();
         }
 
-        //If active AI can see another enemy, check if its talkative
+        // If active AI can see another enemy, check if its talkative
         if (CanSee(otherEnemyAI))
         {
             if (_isTalkative)
             {
-                //If it is, talk to the other AI
+                // If it is, talk to the other AI
                 TalkToAnotherAI();
             }
         }
 
 
 
-        //If the gameObject AI sees is player simulator
+        // If the gameObject AI sees is player simulator
         if (CanSee(playerSimAI))
         {
             _travelling = false;
             Hunt(playerSimAI);
 
-            //Respawning player simulator to continue the simulation
+            // Respawning player simulator to continue the simulation
             GameObject respawn = GameObject.FindGameObjectWithTag("Respawn");
             playerSimAI.transform.position = respawn.transform.position;
             playerSimAI.SetActive(true);
         }
 
 
-        //If the gameObject AI sees is interactable
+        // If the gameObject AI sees is interactable
         if (CanSee(interactableObject))
         {
             objectOfInterest = interactableObject;
 
-            //These statements are placeholders for custom animation or any other types of custom interaction with
-            //separate objects
+            // These statements are placeholders for custom animation or any other types of custom interaction with
+            // separate objects
             if (objectOfInterest.CompareTag("Window") && _interactsWithWindows)
             {
                 checkObjectOut();
@@ -183,7 +188,8 @@ public class EnemyAI : MonoBehaviour
 
 
     private void OnTriggerEnter(Collider other) {
-        //Check if the gameObject entering the trigger is another AI
+        // Check if the gameObject entering the trigger is another AI
+        // If it isn't, save the entity for future reference anyway
         if (other.gameObject.tag == "EnemyAI" && other.gameObject != this)
         {
             otherEnemyAI = other.gameObject;
@@ -194,6 +200,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    // Takes care of the timer and resetting it with 30 seconds delay
     private IEnumerator ResetTimer()
     {
         yield return new WaitForSeconds(30f);
@@ -202,24 +209,24 @@ public class EnemyAI : MonoBehaviour
     }
 
 
-    //Patrolling speed set to enemySpeed indicated in the inspector
+    // Patrolling speed set to enemySpeed indicated in the inspector
     private void Patrol(NavMeshAgent navMeshAgent)
     {
         navMeshAgent.speed = _enemySpeed;
     }
 
 
-    //Brings the NavMeshAgent to a halt
+    // Brings the NavMeshAgent to a halt by setting speed to 0
     private void Halt(NavMeshAgent navMeshAgent)
     {
         navMeshAgent.speed = 0f;
     }
 
-    //Go to the next waypoint
+    // Going to the next waypoint
     private void SetDestination()
     {
         if (_waypointsVisited > 0) {
-            //To maintain where I've just been and where I'm going
+            // To maintain where AI has just been and where its going
             ConnectedWaypoint nextWaypoint = _currentWaypoint.NextWaypoint(_previousWaypoint);
             _previousWaypoint = _currentWaypoint;
             _currentWaypoint = nextWaypoint;
@@ -230,20 +237,15 @@ public class EnemyAI : MonoBehaviour
         _travelling = true;
     }
 
-    //Checking if the current agent can see another object (another AI, or any other game object)
+    // Checking if the current agent can see another object (another AI, or any other game object)
     private bool CanSee(GameObject obj)
     {
         Ray ray = new Ray(transform.position, obj.transform.position);
         RaycastHit hit;
-
         float angleToObject = Vector3.Angle(this.transform.position, obj.transform.position);
-        //Debug.DrawLine(this.transform.position, obj.transform.position, Color.blue);
-
-
         if (_viewAngle > angleToObject)
         {
-            //Debug.Log("In the view range");
-            //If there is an object in the radius and it's in the view
+            // If there is an object in the radius and the tag is what we are looking for
                 if (Physics.Raycast(ray, out hit, _viewRadius) && hit.collider.CompareTag(obj.tag))
                 {
                    return true;
@@ -255,21 +257,20 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            //Debug.Log("Not in the view range");
             return false;
         }
     }
 
 
-    //If the agent sees another agent, they will approach them and strike up a conversation
-    //There's a timer reset to prevent the agents from chatting eternally
+    // If the agent sees another agent, they will approach them and "strike up a conversation"
+    // There's a timer reset to prevent the agents from chatting eternally
     private void TalkToAnotherAI()
     {
 
         Debug.Log("I see " + otherEnemyAI.gameObject.name);
         timer -= Time.deltaTime;
-        //Check if timer hasn't run out yet. If it hasn't, approach the other agent
-        //Stop the other agent from moving
+        // Check if timer hasn't run out yet. If it hasn't, approach the other agent
+        // Stop the other agent from moving
         if (timer > 1)
         { 
             Halt(otherEnemyAI.GetComponent<NavMeshAgent>());
@@ -278,7 +279,7 @@ public class EnemyAI : MonoBehaviour
             Debug.Log("Approaching it");
 
         }
-        //If the timer ran out, continue patrolling
+        // If the timer ran out, continue patrolling
         if (timer <= 1)
         {
             SetDestination();
@@ -289,7 +290,7 @@ public class EnemyAI : MonoBehaviour
             Patrol(_navMeshAgent);
             Patrol(otherEnemyAI.GetComponent<NavMeshAgent>());
 
-            //Reset the timer for the next time they see each other - with delay
+            // Reset the timer for the next time they see each other - with delay
             interactionTimer = 0;
             StartCoroutine(ResetTimer());
         }
@@ -300,12 +301,10 @@ public class EnemyAI : MonoBehaviour
         if (interactionTimer > 1)
         {
             ComeOverTo(objectOfInterest);
-            // Debug.Log("Approaching " + objectOfInterest.name + " and halting.....");
         }
         
         if (interactionTimer <= 1)
         {
-            // Debug.Log("Continuing patrol");
             SetDestination();
             Patrol(_navMeshAgent);
             timer = 0;
@@ -313,7 +312,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    //Approaching another game object
+    // Approaching another game object
     private void ComeOverTo(GameObject obj)
     {
         Vector3 targetVector = obj.transform.position;
@@ -324,9 +323,10 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    // Hunting behaviour sets the AI speed to max and deactivates the PlayerSimAI
+    // if it's close enough for a potential hit
     private void Hunt(GameObject prey)
     {
-        // Debug.Log(" my prey is " + prey.name);
         _navMeshAgent.speed = _maxSpeed;
         _navMeshAgent.SetDestination(prey.transform.position);
         if (_navMeshAgent.remainingDistance <= 1f)
@@ -335,27 +335,17 @@ public class EnemyAI : MonoBehaviour
             _travelling = true;
            
         }
-        // if (! CanSee(prey))
-        // {
-        //     Halt(_navMeshAgent);
-        //    SetDestination();
-        // }
     }
 
     private void OnDrawGizmos()
     {
-        //Gizmos.color = Color.red;
-        //Gizmos.DrawWireSphere(transform.position, maxRadius);
-
         Vector3 fovLine1 = Quaternion.AngleAxis(_viewAngle, transform.up) * transform.forward * _viewRadius;
         Vector3 fovLine2 = Quaternion.AngleAxis(-_viewAngle, transform.up) * transform.forward * _viewRadius;
 
+        // Drawing the field of view
         Gizmos.color = Color.blue;
         Gizmos.DrawRay(transform.position, fovLine1);
         Gizmos.DrawRay(transform.position, fovLine2);
-
-        Gizmos.color = Color.red;
-//        Gizmos.DrawRay(transform.position, (otherEnemyAI.transform.position - transform.position).normalized * maxRadius);
 
         Gizmos.color = Color.black;
         Gizmos.DrawRay(transform.position, transform.forward * _viewRadius);
